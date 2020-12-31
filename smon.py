@@ -1,3 +1,16 @@
+"""
+Serial monitor open source for microcontrollers
+----------------------------------------
+
+This App was created utilizing wxptython and pyserial
+
+
+The actual App still find in a version 1.
+
+
+Copyright (c) 2020,Dario jose artega villalba , All rights reserved.
+"""
+
 import wx
 import wx.lib.platebtn as pbtn
 import wx.lib.agw.gradientbutton as gbtn
@@ -5,8 +18,6 @@ import serial,time
 import threading
 import os
 import sys 
-
-
 
 class myapp(wx.App):
  	def OnInit(self):
@@ -22,35 +33,37 @@ class Myframe(wx.Frame):
  		
  		
  		#INICIO--------creacion de panel para mostras mensaje
- 		self.panel = wx.Panel(self,size=(500,400),pos=(0,140))
- 		self.panel.SetBackgroundColour((100, 100, 100))
+ 		self.panel = wx.Panel(self,size=(500,600),pos=(0,200))
+ 		self.panel.SetBackgroundColour((0,20,20))
  		#FIN-------creacion de panel para mostrar mensaje 
  		 
  		#INICIO-------creacion de panel para botones de incio y parada
- 		self.panel2 = wx.Panel(self,size=(500,130),pos=(0,0))
+ 		self.panel2 = wx.Panel(self,size=(500,200),pos=(0,0))
  		self.panel2.SetBackgroundColour((100,100,100))
  		#FIN-------------de creaion de panel para botones 
- 		bmpstart = wx.Bitmap("/home/dario/Documentos/code/python/conectar2.png",wx.BITMAP_TYPE_ICON)
- 		bmpstop  = wx.Bitmap("/home/dario/Documentos/code/python/desconectar2.png",wx.BITMAP_TYPE_ICON)
+ 		bmpstart = wx.Bitmap('/home/dario/Documentos/Repos/serial-monitor-in-wxpython/image/conectar2.png',wx.BITMAP_TYPE_ANY)
+ 		bmpstop  = wx.Bitmap('/home/dario/Documentos/Repos/serial-monitor-in-wxpython/image/desconectar2.png',wx.BITMAP_TYPE_ANY)
+ 		bmpsend  = wx.Bitmap('/home/dario/Documentos/Repos/serial-monitor-in-wxpython/image/send.png',wx.BITMAP_TYPE_ANY)
  		#INICIO-----------inicio creacion de botones 
  		self.btnConect=wx.BitmapButton(self.panel2,bitmap=bmpstart)
  		self.btnDisconect=wx.BitmapButton(self.panel2,bitmap=bmpstop,pos=(0,60))
  		self.btnstate =wx.Button(self.panel2,style=3,pos=(70,0),size=(20,20))
  		self.btnstate.SetBackgroundColour(("#f11"))
- 		self.btnStart = wx.Button(self.panel2,label="start comunication",pos=(90,90))
+ 		
+ 		self.btnSend = wx.Button(self.panel2,label="SEND",pos=(400,160))
  		#FIN-------------creacion de botones
  
  		self.mensaje_serial = wx.TextCtrl(self.panel,size=(500,400),style=wx.TE_MULTILINE|wx.TE_READONLY)
-		self.mensaje_serial.SetBackgroundColour((41,41,41)) 		
- 		self.mensaje_state= wx.StaticText(self.panel2, id = 1, label ="State mensage", pos =(200, 0),size = wx.DefaultSize, style = 4, name ="statictext")
- 		self.mensaje_state.SetBackgroundColour((41,41,41))
+		self.mensaje_serial.SetBackgroundColour((0,20,20)) 		
+ 		
+
+ 		self.Txinput= wx.TextCtrl(self.panel2,size=(400,50),pos=(0,150))
+ 		self.Txinput.SetBackgroundColour((0,20,20))
  		#INICIO------------event hanlder`s
  		self.Bind(wx.EVT_BUTTON,self.Conect,self.btnConect)
  		self.Bind(wx.EVT_BUTTON,self.Discone,self.btnDisconect)
- 		self.Bind(wx.EVT_BUTTON,self.run_,self.btnStart)
+ 		self.Bind(wx.EVT_BUTTON,self.send_,self.btnSend)
 
-
- 		
 
  		self.serial_state=0 #FLAG STATE CONECTION
  		redir = RedirectText(self.mensaje_serial)
@@ -63,6 +76,8 @@ class Myframe(wx.Frame):
 	 			try: 
 	 				self.arduino_conf= serial.Serial("/dev/ttyACM0",9600,timeout=1)
 	 				self.serial_state=1
+	 				self.btnStart = wx.Button(self.panel2,label="start comunication",pos=(0,100))
+	 				self.Bind(wx.EVT_BUTTON,self.run_,self.btnStart)
 	 			except:
 	 				print ("val serial_state %s"%self.serial_state)
 	 				self.serial_state=0
@@ -76,9 +91,13 @@ class Myframe(wx.Frame):
  			while True:
  				self.data=self.arduino_conf.readline()
  				print(self.data)
+ 	def COM_SERIAL_TX(self):
+ 			self.arduino_conf.write("hola\n")
+
 	def Conect(self, event):
 			self.open_COM()
 			#self.COM_SERIAL_RX()
+			self.btnstate.SetLabel("CONECT")
 			self.btnstate.SetBackgroundColour((0,143,57))
 			
 	def Discone(self,event):
@@ -93,6 +112,8 @@ class Myframe(wx.Frame):
 	def run_(self,event):
 		self.s=threading.Thread(target=self.COM_SERIAL_RX)
 		self.s.start()
+	def send_(self,event):
+		self.COM_SERIAL_TX()
 class RedirectText(object):
     def __init__(self, aWxTextCtrl):
         self.out=aWxTextCtrl
