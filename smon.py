@@ -1,3 +1,6 @@
+#! / usr / bin / python
+#UTF-8
+
 """
 Serial monitor open source for microcontrollers
 ----------------------------------------
@@ -73,15 +76,15 @@ class Myframe(wx.Frame):
  		self.serial_state=0 #FLAG STATE CONECTION
  		redir = RedirectText(self.mensaje_serial)
 		sys.stdout=redir
-#<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<parte^grafica
+#<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<parte grafica>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 	def flag(self,val):
 		self.serial_state=val
-	def open_COM(self,):
+	def open_COM(self):
 	 		if self.serial_state==0:
 	 			try: 
-	 				self.arduino_conf= serial.Serial("/dev/ttyACM0",9600,timeout=1)
+	 				self.serial_conf= serial.Serial("/dev/ttyACM0",9600,timeout=1)
 	 				self.serial_state=1
-	 				self.btnStart_Com = wx.Button(self.panel2,label="Start comunication",size=(168,50),pos=(5,60))
+	 				self.btnStart_Com = wx.Button(self.panel2,label="Iniciar comunicacion",size=(168,50),pos=(5,60))
 	 				self.btnStart_Com.SetBackgroundColour("#008db1")
 	 				self.Bind(wx.EVT_BUTTON,self.run_,self.btnStart_Com)
 	 				self.btnSend = wx.Button(self.panel,label="SEND",pos=(400,339))
@@ -91,19 +94,23 @@ class Myframe(wx.Frame):
 	 				wx.MessageBox('Primero conecte el dispositivo serial', 'Info',wx.OK | wx.ICON_INFORMATION)
 	 				self.serial_state=0
 	def close_COM(self):
-		self.arduino_conf.close()
+		self.serial_conf.close()
 		self.dead=True
+		self.btnSend.Destroy()
+		self.btnStart_Com.Destroy()
 
 	def COM_SERIAL_RX(self):
 		self.dead=False
  		while (not self.dead):
  			while True:
- 				self.data=self.arduino_conf.readline()
- 				print (self.data)
+ 				self.data=self.serial_conf.readline()
+ 				if self.data >= 1:
+ 					print (self.data)
  	def COM_SERIAL_TX(self):
- 			data = "hola mundo"
- 			self.arduino_conf.write(b"%s"%data)
-
+ 			data =self.Txinput.GetValue()
+ 			if data >= 1:
+ 				#self.arduino_conf.write(b"%s"%data)
+ 				self.serial_conf.write(data.encode()+"\n")
 	def Conect(self, event):
 			self.open_COM()
 			#self.COM_SERIAL_RX()
@@ -119,6 +126,7 @@ class Myframe(wx.Frame):
 	def run_(self,event):
 		self.s=threading.Thread(target=self.COM_SERIAL_RX)
 		self.s.start()
+
 	def send_(self,event):
 		self.COM_SERIAL_TX()
 
@@ -130,7 +138,6 @@ class RedirectText(object):
 
     def write(self, string):
         wx.CallAfter(self.out.WriteText, string)
-
 
 
 if __name__ =="__main__":
