@@ -43,21 +43,18 @@ class Myframe(wx.Frame):
  		#INICIO-------creacion de panel para botones de incio y parada
  		self.panel2 = wx.Panel(self,size=(500,200),pos=(0,0))
  		self.panel2.SetBackgroundColour(("#FFFFFF"))
- 		#FIN-------------de creaion de panel para botones 
- 		bmpstart = wx.Bitmap('/home/dario/Documentos/Repos/serial-monitor-in-wxpython/image/conectar2.png',wx.BITMAP_TYPE_ANY)
- 		bmpstop  = wx.Bitmap('/home/dario/Documentos/Repos/serial-monitor-in-wxpython/image/desconectar2.png',wx.BITMAP_TYPE_ANY)
- 		bmpsend  = wx.Bitmap('/home/dario/Documentos/Repos/serial-monitor-in-wxpython/image/send.png',wx.BITMAP_TYPE_ANY)
- 		#INICIO-----------inicio creacion de botones 
+
  		Ports =  u"/dev/ttyACM0|/devTttyACM1|/dev/ttyACM2".split("|")
  		baud = 	 u"9600|16000|202000".split("|")
- 		self.btnConect=wx.Button(self.panel2,label="Abrir",size=(80,40),pos=(5,5))
- 		self.btnDisconect=wx.Button(self.panel2,label="Cerrar",size=(80,40),pos=(94,5))
+
+ 		self.btnConect=wx.Button(self.panel2,label="Conectar",size=(80,40),pos=(5,5))
+ 		
  		self.Cbbox_ports = wx.ComboBox(self.panel2,value="",choices=Ports,size=(120,25),style=wx.CB_READONLY,pos=(350,15))	
  		self.Cbbox_baud = wx.ComboBox(self.panel2,value="EmptyString",choices=baud,size=(120,25),style=wx.CB_READONLY,pos=(350,65))
 
 
  		self.btnConect.SetBackgroundColour("#008db1")
- 		self.btnDisconect.SetBackgroundColour("#008db1")
+ 		
  		self.Cbbox_ports.SetBackgroundColour("#008db1")
  		self.Cbbox_baud.SetBackgroundColour("#008bd1")
  		#FIN-------------creacion de botones
@@ -70,7 +67,7 @@ class Myframe(wx.Frame):
  		self.Txinput.SetBackgroundColour("#232323")
  		#INICIO------------event hanlder`s
  		self.Bind(wx.EVT_BUTTON,self.Conect,self.btnConect)
- 		self.Bind(wx.EVT_BUTTON,self.Discone,self.btnDisconect)
+ 		
  		
 
  		self.serial_state=0 #FLAG STATE CONECTION
@@ -84,12 +81,24 @@ class Myframe(wx.Frame):
 	 			try: 
 	 				self.serial_conf= serial.Serial("/dev/ttyACM0",9600,timeout=1)
 	 				self.serial_state=1
+
+	 				self.btnDisconect=wx.Button(self.panel2,label="Desconectar",size=(80,40),pos=(5,5))
+	 				self.btnDisconect.SetBackgroundColour("#008db1")
+	 				self.Bind(wx.EVT_BUTTON,self.Discone,self.btnDisconect)
+
 	 				self.btnStart_Com = wx.Button(self.panel2,label="Iniciar comunicacion",size=(168,50),pos=(5,60))
 	 				self.btnStart_Com.SetBackgroundColour("#008db1")
 	 				self.Bind(wx.EVT_BUTTON,self.run_,self.btnStart_Com)
+	 				
 	 				self.btnSend = wx.Button(self.panel,label="SEND",pos=(400,339))
 	 				self.btnSend.SetBackgroundColour("#008db1")
 	 				self.Bind(wx.EVT_BUTTON,self.send_,self.btnSend)
+
+
+	 				#self.btnConect.Destroy()
+
+
+
 	 			except:
 	 				wx.MessageBox('Primero conecte el dispositivo serial', 'Info',wx.OK | wx.ICON_INFORMATION)
 	 				self.serial_state=0
@@ -98,6 +107,8 @@ class Myframe(wx.Frame):
 		self.dead=True
 		self.btnSend.Destroy()
 		self.btnStart_Com.Destroy()
+		self.btnDisconect.Destroy()
+
 
 	def COM_SERIAL_RX(self):
 		self.dead=False
@@ -121,7 +132,7 @@ class Myframe(wx.Frame):
 			print("COM serial closed")
 			self.btnStart.Destroy()
 		except AttributeError:
-			print "Primero conectece"
+			pass
 
 	def run_(self,event):
 		self.s=threading.Thread(target=self.COM_SERIAL_RX)
